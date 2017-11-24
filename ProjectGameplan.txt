@@ -1,0 +1,45 @@
+Chunks
+
+-client.py												**E
+--main
+	- Balance 	- get_bal
+	- Send 		- send_val
+	- Status 	- txn_stat
+	
+				- send_msg
+				- find_utxos_for_address (balance)
+				- make_txin
+				
+	-Make a gui ya dingus
+	Tkinter												**E
+	
+	-implement:
+		- info
+		- transactions statuses
+		- 
+				
+				
+	
+-tinychain.py												
+---Imports/Block										**S
+--Chain													**S
+-Chain_Persistance										**S
+-UTXO(unspentTransactionOut "the balance")				**R
+--"Proof of Work" ("solving the hard math problem")		**R
+---Validation											**C
+-Mempool												**C
+-Merkle_Trees											**S
+-Peer-to-Peer											**C
+-Wallet													**E
+-Misc. 													**C
+-Main													**C
+
+
+
+*******Use whatever it is returning names.
+
+
+
+
+
+
