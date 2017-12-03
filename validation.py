@@ -1,3 +1,5 @@
+import SERCcoin.py
+
 def validate_txn(txn: Transaction,
                  as_coinbase: bool = False,
                  siblings_in_block: Iterable[Transaction] = None,
@@ -13,7 +15,7 @@ def validate_txn(txn: Transaction,
 
     #using enumerate for better exceptions messages
     for i, txin in enumerate(txn.txins):
-        
+
         utxo = utxo_set.get(txin.to_spend)
 
         if siblings_in_block:
@@ -72,6 +74,8 @@ def build_spend_message(to_spend, pk, sequence, txouts) -> bytes:
         binascii.hexlify(pk).decode() + serialize(txouts)).encode()
 
 
+#validates a block
+# checks if
 @with_lock(chain_lock)
 def validate_block(block: Block) -> Block:
     if not block.txns:
@@ -81,7 +85,7 @@ def validate_block(block: Block) -> Block:
     if block.timestamp - time.time() > Params.MAX_FUTURE_BLOCK_TIME:
         raise BlockValidationError('Block timestamp too far in future')
 
-    #TODO: wtf does this do
+    #checks to see if the target difficulty isnt met
     if int(block.id, 16) > (1 << (256 - block.bits)):
         raise BlockValidationError("Block header doesn't satisfy bits")
 
@@ -89,16 +93,19 @@ def validate_block(block: Block) -> Block:
     if [i for (i, tx) in enumerate(block.txns) if tx.is_coinbase] != [0]:
         raise BlockValidationError('First txn must be coinbase and no more')
 
+    #validate each transaction in block
     try:
         for i, txn in enumerate(block.txns):
-            txn.validate_basics(as_coinbase=(i == 0))
+            txn.validate_basics(as_coinbase=(i == 0))#only the first transaction should be a coinbase
     except TxnValidationError:
         logger.exception(f"Transaction {txn} in {block} failed to validate")
         raise BlockValidationError('Invalid txn {txn.id}')
 
+    #checks if merkle tree is correct
     if get_merkle_root_of_txns(block.txns).val != block.merkle_hash:
         raise BlockValidationError('Merkle hash invalid')
 
+    #checks if checks to see if timestamp is to old
     if block.timestamp <= get_median_time_past(11):
         raise BlockValidationError('timestamp too old')
 
@@ -134,4 +141,4 @@ def validate_block(block: Block) -> Block:
             logger.exception(msg)
             raise BlockValidationError(msg)
 
-return block, prev_block_chain_idx
+    return block, prev_block_chain_idx

@@ -187,5 +187,5 @@ def sha256d(s: Union[str, bytes]) -> str:
     return hashlib.sha256(hashlib.sha256(s).digest()).hexdigest()
 
 #TODO move this somewhere else
-def _chunks(l, n) -> Iterable[Iterable]:
+def chunks(l, n) -> Iterable[Iterable]:
     pass
