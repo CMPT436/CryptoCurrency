@@ -35,7 +35,7 @@ class GetBlocksMsg(NamedTuple):  # Request blocks during initial sync
 
         # If we don't recognize the requested hash as part of the active
         # chain, start at the genesis block.
-        if(!height):
+        if(height is none):
             height = 1
         with chain_lock:
             blocks = active_chain[height:(height + self.CHUNK_SIZE)]
