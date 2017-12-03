@@ -14,7 +14,27 @@ rewards are given to users who solve these problems
 for incentive to mine the blocks
 
 
-"""
+""" 
+import time
+import json
+import threading
+
+
+class Params:
+
+	#the number of right bitshifts on 2^256 
+	#to initialize the difficulty of mining
+	INITIAL_DIFFICULTY_BITS = 24
+
+	#the desired time(seconds) elapsed between blocks being mined
+	DESIRED_SECONDS_BETWEEN_BLOCKS = 60
+
+	# period of time for a difficulty target to be in place
+	DIFFICULTY_PERIOD = (60 * 60 * 10)
+
+	# re-calculate difficulty after DIFFICULTY_PERIOD_IN_BLOCKS are mined
+	DIFFICULTY_PERIOD_IN_BLOCKS = (DIFFICULTY_PERIOD / DESIRED_SECONDS_BETWEEN_BLOCKS)
+
 
 
 def get_difficulty_of_problem(prev_block_hash: str) -> int:
@@ -38,7 +58,7 @@ def get_difficulty_of_problem(prev_block_hash: str) -> int:
 	prev_block_time_taken_to_solve = prev_block.timestamp - this_block.timestamp
 
 	# if it took less time than targeted, increase difficulty
-	if prev_block_time_taken_to_solve < Params.DIFFICULTY_PERIOD_IN_SECS_TARGET
+	if prev_block_time_taken_to_solve < Params.DIFFICULTY_PERIOD
 		return prev_block.bits + 1
 	else: #increase difficulty
 		return prev_block.bits - 1
