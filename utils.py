@@ -16,6 +16,8 @@ from typing import (
 import ecdsa
 from base58 import b58encode_check
 
+# Peer-to-peer
+
 #get dict of peers from enviroment
 peer_hostnames = {p for p in os.environ.get('TC_PEERS', '').split(',') if p}
 
@@ -49,4 +51,29 @@ def encode_socket_data(data: object) -> bytes:
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 class TCPHandler(socketserver.BaseRequestHandler):
+    pass
+class BaseException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+class TxUnlockError(BaseException):
+    pass
+
+class TxnValidationError(BaseException):
+    pass
+
+class BlockValidationError(BaseException):
+    pass
+
+
+def serialize(obj) -> str:
+    pass
+
+def deserialize(serialized: str) -> object:
+    pass
+
+def sha256d(s: Union[str, bytes]) -> str:
+    pass
+
+def _chunks(l, n) -> Iterable[Iterable]:
     pass
