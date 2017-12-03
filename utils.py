@@ -154,6 +154,7 @@ class TCPHandler(socketserver.BaseRequestHandler):
             logger.info(f"received block {data.id} from peer {peer_hostname}")
             connect_block(data)
 
+#exceptions
 class BaseException(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -162,10 +163,14 @@ class TxUnlockError(BaseException):
     pass
 
 class TxnValidationError(BaseException):
-    pass
+    def __init__(self, *args, to_orphan: Transaction = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.to_orphan = to_orphan
 
 class BlockValidationError(BaseException):
-    pass
+    def __init__(self, *args, to_orphan: Block = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.to_orphan = to_orphan
 
 
 def serialize(obj) -> str:
@@ -175,7 +180,12 @@ def deserialize(serialized: str) -> object:
     pass
 
 def sha256d(s: Union[str, bytes]) -> str:
-    pass
+    """A double SHA-256 hash."""
+    if not isinstance(s, bytes):
+        s = s.encode()
 
+    return hashlib.sha256(hashlib.sha256(s).digest()).hexdigest()
+
+#TODO move this somewhere else
 def _chunks(l, n) -> Iterable[Iterable]:
     pass
