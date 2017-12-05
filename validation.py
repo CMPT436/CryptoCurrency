@@ -1,5 +1,3 @@
-import SERCcoin.py
-
 def validate_txn(txn: Transaction,
                  as_coinbase: bool = False,
                  siblings_in_block: Iterable[Transaction] = None,

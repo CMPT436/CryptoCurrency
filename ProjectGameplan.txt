@@ -5,41 +5,35 @@ Chunks
 	- Balance 	- get_bal
 	- Send 		- send_val
 	- Status 	- txn_stat
-	
+
 				- send_msg
 				- find_utxos_for_address (balance)
 				- make_txin
-				
+
 	-Make a gui ya dingus
 	Tkinter												**E
-	
+
 	-implement:
 		- info
 		- transactions statuses
-		- 
-				
-				
-	
--tinychain.py												
+		-
+
+
+
+-tinychain.py
 ---Imports/Block										**S
 --Chain													**S
 -Chain_Persistance										**S
 -UTXO(unspentTransactionOut "the balance")				**R
 --"Proof of Work" ("solving the hard math problem")		**R
----Validation											**C
--Mempool												**C
+---Validation											**C _/ kinda
+-Mempool												**C _/
 -Merkle_Trees											**S
--Peer-to-Peer											**C
+-Peer-to-Peer											**C _/
 -Wallet													**E
--Misc. 													**C
--Main													**C
+-Misc. 													**C _/
+-Main													**C _/
 
 
 
 *******Use whatever it is returning names.
-
-
-
-
-
-
