@@ -3,20 +3,21 @@
 #Client GUI Class
 #*********************
 # - A GUI for Client of Crypto Implementation
-# Has functionality for seeing Balance and making transactions, and viewing tr 
+# Has functionality for seeing Balance and making transactions, and viewing tr
 
 
-
-
-import Tkinter as tk
-import tkMessageBox
-import SERCchain as c
+import tkinter as tk
+# import tkMessageBox
+import tkinter.messagebox as tkMessageBox
+import SHERcoin as c
 import client as cli
 import subprocess as sub
 
+my_wallet = "wallet2.dat"
+
 def main(args):
-    if args['-w']:
-        my_wallet = args[1]
+    my_wallet = args[1]
+    print(sys.argv[1])
 
 #Balance Button PopUp
 def bal():
@@ -26,7 +27,7 @@ def bal():
 #Send Coin
 def sendit():
 	tkMessageBox.showinfo("Sending", "You Sent :"+sendAmount.get()+" to Address: "+sendAddy.get())
-	
+
 #View Transaction	Status
 def status():
 	tkMessageBox.showinfo("Your Balance", "Your Balance is: "+get_bal)
@@ -42,8 +43,8 @@ sendAmount = tk.StringVar()
 sendAddy = tk.StringVar()
 txID = tk.StringVar()
 
-button = tk.Button(frame, 
-                   text="QUIT", 
+button = tk.Button(frame,
+                   text="QUIT",
                    fg="red",
                    command=quit)
 button.grid(row=5, column=0, sticky=tk.W)
