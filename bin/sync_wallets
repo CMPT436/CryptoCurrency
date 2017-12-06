@@ -1,11 +1,25 @@
 #!/bin/bash
 
-docker-compose exec node1 cat wallet.dat > wallet1.dat
-echo "Synced node1's wallet:"
+docker-compose exec f1 cat wallet.dat > wallet1.dat
+echo "f1's wallet:"
 ./client.py balance
 echo
 
-docker-compose exec node2 cat wallet.dat > wallet2.dat
-echo "Synced node2's wallet:"
+docker-compose exec f2 cat wallet.dat > wallet2.dat
+echo "f2's wallet:"
 ./client.py balance --wallet wallet2.dat
-~                                           
+
+docker-compose exec f3 cat wallet.dat > wallet3.dat
+echo "f3's wallet:"
+./client.py balance --wallet wallet3.dat
+echo
+
+docker-compose exec f4 cat wallet.dat > wallet4.dat
+echo "f4's wallet:"
+./client.py balance --wallet wallet4.dat
+echo
+
+docker-compose exec f5 cat wallet.dat > wallet5.dat
+echo "f5's wallet:"
+./client.py balance --wallet wallet5.dat
+echo

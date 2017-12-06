@@ -3,7 +3,7 @@
 #Client GUI Class
 #*********************
 # - A GUI for Client of Crypto Implementation
-# Has functionality for seeing Balance and making transactions, and viewing transactions
+# Has functionality for seeing Balance and making transactions, and viewing tr
 
 
 import tkinter as tk
@@ -13,7 +13,7 @@ import SHERcoin as c
 import client as cli
 import subprocess as sub
 
-my_wallet = "wallet1.dat"
+
 
 
 #Balance Button PopUp
@@ -23,7 +23,7 @@ def bal():
 
 #Send Coin
 def sendit():
-	sent = sub.check_output(['./client.py', 'send', '-w', walletOption.get(), sendAddy.get(), sendAmount.get()]))
+	sent = sub.check_output(['./client.py', 'send', '-w', walletOption.get(), sendAddy.get(), sendAmount.get()])
 	tkMessageBox.showinfo("Sending", sent)
 
 #View Transaction	Status
@@ -32,7 +32,7 @@ def status():
 	tkMessageBox.showinfo("Your Balance", txStat)
 
 
-##Tkinter GUI 
+##Tkinter GUI
 root = tk.Tk()
 frame = tk.Frame(root)
 frame.grid()
@@ -42,7 +42,7 @@ sendAddy = tk.StringVar()
 txID = tk.StringVar()
 walletOption = tk.StringVar()
 
-wallets = {'wallet1.dat', 'wallet2.dat', 'wallet3.dat', 'wallet4.dat'}
+wallets = {'wallet1.dat', 'wallet2.dat', 'wallet3.dat', 'wallet4.dat', 'wallet5.dat'}
 
 
 

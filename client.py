@@ -1,81 +1,133 @@
-#Hustone
-#436 Project
-#Client GUI Class
-#*********************
-# - A GUI for Client of Crypto Implementation
-# Has functionality for seeing Balance and making transactions, and viewing tr 
+#!/usr/bin/env python3
+"""
+  SHERcoin client
+
+Usage:
+  client.py balance [options] [--raw]
+  client.py send [options] <addr> <val>
+  client.py status [options] <txid> [--csv]
+
+Options:
+  -h --help            Show help
+  -w, --wallet PATH    Use a particular wallet file (e.g. `-w ./wallet2.dat`)
+  -n, --node HOSTNAME  The hostname of node to use for RPC (default: localhost)
+  -p, --port PORT      Port node is listening on (default: 9999)
+
+"""
+import logging
+import os
+import socket
+
+from docopt import docopt
+
+import SHERcoin as t
 
 
+logging.basicConfig(
+    level=getattr(logging, os.environ.get('TC_LOG_LEVEL', 'INFO')),
+    format='[%(asctime)s][%(module)s:%(lineno)d] %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 
 
-import Tkinter as tk
-import tkMessageBox
+def main(args):
+    args['signing_key'], args['verifying_key'], args['my_addr'] = (
+        t.init_wallet(args.get('--wallet')))
+    if args['--port']:
+        send_msg.port = args['--port']
+    if args['--node']:
+        send_msg.node_hostname = args['--node']
+    if args['balance']:
+        get_balance(args)
+    elif args['send']:
+        send_value(args)
+    elif args['status']:
+        txn_status(args)
+
+# The function call to get get the balance for the wallet.
+def get_balance(args):
+    """
+    Get the balance of a given address.
+    """
+    val = sum(i.value for i in find_utxos_for_address(args))
+    print(val if args['--raw'] else f"{val / t.Params.BELUSHIS_PER_COIN} $ ")
 
 
-#Balance Button PopUp
-def bal():
-	tkMessageBox.showinfo("Your Balance", "Your Balance is: "+get_bal)
+# transaction status pulls out the information for the transaction
+def txn_status(args):
+    """
+    Get the status of a transaction.
 
-#Send Coin	
-def sendit():
-	tkMessageBox.showinfo("Sending", "You Sent :"+sendAmount.get()+" to Address: "+sendAddy.get())
-	
-#View Transaction	Status
-def status():
-	tkMessageBox.showinfo("Your Balance", "Your Balance is: "+get_bal)
+    Prints [status],[containing block_id],[height mined]
+    """
+    txid = args['<txid>']
+    as_csv = args['--csv']
+    mempool = send_msg(t.GetMempoolMsg())
 
-get_bal = "100"
+    if txid in mempool:
+        print(f'{txid}:in_mempool,,' if as_csv else 'Found in mempool')
+        return
 
+    chain = send_msg(t.GetActiveChainMsg())
 
+    for tx, block, height in t.txn_iterator(chain):
+        if tx.id == txid:
+            print(
+                f'{txid}:mined,{block.id},{height}' if as_csv else
+                f'Mined in {block.id} at height {height}')
+            return
 
-root = tk.Tk()
-frame = tk.Frame(root)
-frame.grid()
-
-sendAmount = tk.StringVar()
-sendAddy = tk.StringVar()
-txID = tk.StringVar()
-
-button = tk.Button(frame, 
-                   text="QUIT", 
-                   fg="red",
-                   command=quit)
-button.grid(row=5, column=0, sticky=tk.W)
-
-bal_butt = tk.Button(frame,
-                   text="Balance",
-                   command=bal)
-bal_butt.grid(row=0, column=0, sticky=tk.W)
-
-send_butt = tk.Button(frame,
-                   text="Send",
-                   command=sendit)
-send_butt.grid(row=1, column=0, sticky=tk.W)
-
-amountLabel = tk.Label(frame, text="Amount: ")
-amountLabel.grid(row=1, column=1)
-
-send_AmountEntry = tk.Entry(frame, textvariable=sendAmount)
-send_AmountEntry.grid(row=1, column=2)
-
-addyLabel = tk.Label(frame, text="Address: ")
-addyLabel.grid(row=1, column=3)
+    print(f'{txid}:not_found,,' if as_csv else 'Not found')
 
 
-send_AddyEntry = tk.Entry(frame, textvariable=sendAddy)
-send_AddyEntry.grid(row=1, column=4)
+# Send value sends the by wallet and address.
+def send_value(args: dict):
+    """
+    Send value to some address.
+    """
+    val, to_addr, sk = int(args['<val>']), args['<addr>'], args['signing_key']
+    selected = set()
+    my_coins = list(sorted(
+        find_utxos_for_address(args), key=lambda i: (i.value, i.height)))
+
+    for coin in my_coins:
+        selected.add(coin)
+        if sum(i.value for i in selected) > val:
+            break
+
+    txout = t.TxOut(value=val, to_address=to_addr)
+
+    txn = t.Transaction(
+        txins=[make_txin(sk, coin.outpoint, txout) for coin in selected],
+        txouts=[txout])
+
+    send_msg(txn)
 
 
-stat_butt = tk.Button(frame,
-                   text="View Status",
-                   command=status)
-stat_butt.grid(row=3, column=0, sticky=tk.W)
+# Sends message to the via socket to get the txn info
+def send_msg(data: bytes, node_hostname=None, port=None):
+    node_hostname = getattr(send_msg, 'node_hostname', 'localhost')
+    port = getattr(send_msg, 'port', 9999)
 
-txLabel = tk.Label(frame, text="Address: ")
-txLabel.grid(row=3, column=1)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((node_hostname, port))
+        s.sendall(t.encode_socket_data(data))
+        return t.read_all_from_socket(s)
 
 
-stat_TxEntry = tk.Entry(frame, textvariable=txID)
-stat_TxEntry.grid(row=3, column=2)
+def find_utxos_for_address(args: dict):
+    utxo_set = dict(send_msg(t.GetUTXOsMsg()))
+    return [u for u in utxo_set.values() if u.to_address == args['my_addr']]
 
-root.mainloop()
+
+def make_txin(signing_key, outpoint: t.OutPoint, txout: t.TxOut) -> t.TxIn:
+    sequence = 0
+    pk = signing_key.verifying_key.to_string()
+    spend_msg = t.build_spend_message(outpoint, pk, sequence, [txout])
+
+    return t.TxIn(
+        to_spend=outpoint, unlock_pk=pk,
+        unlock_sig=signing_key.sign(spend_msg), sequence=sequence)
+
+
+if __name__ == '__main__':
+    main(docopt(__doc__, version='tinychain client 0.1'))

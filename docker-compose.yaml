@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+
+  f1:
+    build: .
+    image: tinychain
+    ports:
+      - "9999:9999"
+
+  f2:
+    image: tinychain
+    environment:
+      TC_PEERS: 'f1'
+
+  f3:
+    image: tinychain
+    environment:
+      TC_PEERS: 'f2'
+
+  f4:
+    image: tinychain
+    environment:
+      TC_PEERS: 'f3'
+
+  f5:
+    image: tinychain
+    environment:
+      TC_PEERS: 'f4'
